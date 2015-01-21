@@ -235,6 +235,19 @@ class LibvirtVifTestCase(test.NoDBTestCase):
                                             subnets=[subnet_bridge_4],
                                             interface='eth0')
 
+    network_vrouter = network_model.Network(id='network-id-xxx-yyy-zzz',
+                                            label=None,
+                                            bridge=None,
+                                            subnets=[subnet_bridge_4,
+                                                     subnet_bridge_6],
+                                            interface='eth0')
+
+    vif_vrouter = network_model.VIF(id='vif-xxx-yyy-zzz',
+                                    address='ca:fe:de:ad:be:ef',
+                                    network=network_vrouter,
+                                    type=network_model.VIF_TYPE_VROUTER,
+                                    devname='tap-xxx-yyy-zzz')
+
     vif_mlnx = network_model.VIF(id='vif-xxx-yyy-zzz',
                                  address='ca:fe:de:ad:be:ef',
                                  network=network_mlnx,
@@ -792,6 +805,20 @@ class LibvirtVifTestCase(test.NoDBTestCase):
                               self.instance,
                               self.vif_mlnx)
             self.assertEqual(0, execute.call_count)
+
+    def test_unplug_vrouter_with_details(self):
+        d = vif.LibvirtGenericVIFDriver()
+        d.unplug_vrouter(None, self.vif_vrouter)
+
+    def test_plug_vrouter_with_details(self):
+        d = vif.LibvirtGenericVIFDriver()
+        instance = {
+            'name': 'instance-name',
+            'uuid': '46a4308b-e75a-4f90-a34a-650c86ca18b2',
+            'project_id': 'b168ea26fa0c49c1a84e1566d9565fa5',
+            'display_name': 'instance1'
+        }
+        d.plug_vrouter(instance, self.vif_vrouter)
 
     def test_ivs_ethernet_driver(self):
         d = vif.LibvirtGenericVIFDriver()
